@@ -14,9 +14,8 @@ import matplotlib.animation as manimation
 logging.basicConfig(level='INFO', format='%(levelname)7s %(message)s')
 logger = logging.getLogger(__name__)
 
-half_width = 20
 
-def get_data(filename, ra, dec):
+def get_data(filename, ra, dec, half_width):
     header = fits.getheader(filename)
     w = wcs.WCS(header)
     x, y = w.all_world2pix(ra, dec, 0)
@@ -26,16 +25,16 @@ def get_data(filename, ra, dec):
     vignette = np.log10(fits.getdata(filename)[ylim[0]:ylim[1], xlim[0]:xlim[1]] + 1)
     return vignette, x_offset, y_offset
 
+
 def fetch_ra_dec_from_catalogue(catalogue, index):
     with fits.open(catalogue) as infile:
         if 'catalogue' in infile:
             cat = infile['catalogue'].data
-            return (cat['ra'][index], cat['dec'][index])
         else:
             cat = infile[1].data
-            return (
-                    np.degrees(cat['ra'][index]),
-                    np.degrees(cat['dec'][index]))
+
+    ra, dec = cat['ra'][index], cat['dec'][index]
+    return np.degrees(ra), np.degrees(dec)
 
 
 def main(args):
@@ -48,26 +47,31 @@ def main(args):
     else:
         ra, dec = args.ra, args.dec
 
+    logger.info('RA: %s, DEC: %s', ra, dec)
+
     files = sorted(args.filename)
     nfiles = len(files)
+    half_width = args.half_width
 
     fig = plt.figure()
-    initial_data, initial_x_offset, initial_y_offset = get_data(files[0], ra, dec)
+    initial_data, initial_x_offset, initial_y_offset = get_data(files[0], ra, dec,
+                                                                half_width)
 
     im = plt.imshow(initial_data, interpolation='None')
     ax = plt.gca()
     circle = plt.Circle(
-            (half_width, + initial_x_offset, half_width + initial_y_offset),
-            3, edgecolor='g', facecolor='None')
+        (half_width, +initial_x_offset, half_width + initial_y_offset), 3,
+        edgecolor='g',
+        facecolor='None')
 
     ax.add_patch(circle)
 
-
     def update(i):
         fname = files[i]
-        vignette, offset_x, offset_y = get_data(fname, ra, dec)
+        vignette, offset_x, offset_y = get_data(fname, ra, dec, half_width)
         im.set_data(vignette)
-        im.set_clim(vignette.min(), vignette.max())
+        med_vignette = np.median(vignette)
+        im.set_clim(0.99 * med_vignette, 1.2 * med_vignette)
         circle.center = (half_width + offset_x, half_width + offset_y)
 
         print('\r{}/{}'.format(i, nfiles), end='')
@@ -80,9 +84,6 @@ def main(args):
         plt.show()
 
 
-
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='+')
@@ -92,4 +93,5 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--catalogue', required=False)
     parser.add_argument('-o', '--output', required=False)
     parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-w', '--half-width', required=False, type=int, default=20)
     main(parser.parse_args())
