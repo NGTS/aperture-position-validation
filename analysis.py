@@ -30,11 +30,12 @@ def fetch_ra_dec_from_catalogue(catalogue, index):
     with fits.open(catalogue) as infile:
         if 'catalogue' in infile:
             cat = infile['catalogue'].data
+            ra, dec = cat['ra'][index], cat['dec'][index]
         else:
             cat = infile[1].data
-
-    ra, dec = cat['ra'][index], cat['dec'][index]
-    return np.degrees(ra), np.degrees(dec)
+            ra, dec = (np.degrees(cat['ra'][index]),
+                    np.degrees(cat['dec'][index]))
+    return ra, dec
 
 
 def main(args):
