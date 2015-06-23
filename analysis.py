@@ -32,11 +32,13 @@ def main(args):
         logger.setLevel('DEBUG')
     logger.debug(args)
 
+    if not args.ra and not args.dec:
+        ra, dec = fetch_ra_dec_from_catalogue(args.catalogue, args.index)
+    else:
+        ra, dec = args.ra, args.dec
+
     files = sorted(args.filename)
     nfiles = len(files)
-
-
-    ra, dec = args.ra, args.dec
 
     fig = plt.figure()
     initial_data, initial_x_offset, initial_y_offset = get_data(files[0], ra, dec)
@@ -75,6 +77,9 @@ if __name__ == '__main__':
     parser.add_argument('filename', nargs='+')
     parser.add_argument('-r', '--ra', required=True, type=float)
     parser.add_argument('-d', '--dec', required=True, type=float)
+    parser.add_argument('-i', '--index', required=False, type=int)
+    parser.add_argument('-c', '--catalogue', required=False,
+            type=argparse.FileType('r'))
     parser.add_argument('-o', '--output', required=False)
     parser.add_argument('-v', '--verbose', action='store_true')
     main(parser.parse_args())
