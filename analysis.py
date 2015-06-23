@@ -7,9 +7,9 @@ import logging
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.animation as manimation
 from astropy.io import fits
 from astropy import wcs
-import matplotlib.animation as manimation
 
 logging.basicConfig(level='INFO', format='%(levelname)7s %(message)s')
 logger = logging.getLogger(__name__)
