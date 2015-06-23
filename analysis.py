@@ -26,6 +26,17 @@ def get_data(filename, ra, dec):
     vignette = np.log10(fits.getdata(filename)[ylim[0]:ylim[1], xlim[0]:xlim[1]] + 1)
     return vignette, x_offset, y_offset
 
+def fetch_ra_dec_from_catalogue(catalogue, index):
+    with fits.open(catalogue) as infile:
+        if 'catalogue' in infile:
+            cat = infile['catalogue'].data
+            return (cat['ra'][index], cat['dec'][index])
+        else:
+            cat = infile[1].data
+            return (
+                    np.degrees(cat['ra'][index]),
+                    np.degrees(cat['dec'][index]))
+
 
 def main(args):
     if args.verbose:
@@ -75,11 +86,10 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='+')
-    parser.add_argument('-r', '--ra', required=True, type=float)
-    parser.add_argument('-d', '--dec', required=True, type=float)
+    parser.add_argument('-r', '--ra', type=float)
+    parser.add_argument('-d', '--dec', type=float)
     parser.add_argument('-i', '--index', required=False, type=int)
-    parser.add_argument('-c', '--catalogue', required=False,
-            type=argparse.FileType('r'))
+    parser.add_argument('-c', '--catalogue', required=False)
     parser.add_argument('-o', '--output', required=False)
     parser.add_argument('-v', '--verbose', action='store_true')
     main(parser.parse_args())
