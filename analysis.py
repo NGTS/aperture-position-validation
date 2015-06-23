@@ -77,7 +77,9 @@ def main(args):
         print('\r{}/{}'.format(i, nfiles), end='')
         return im, circle
 
-    ani = manimation.FuncAnimation(fig, update, frames=nfiles, interval=15, blit=True)
+    interval = 1000. / args.fps
+
+    ani = manimation.FuncAnimation(fig, update, frames=nfiles, interval=interval, blit=True)
     if args.output is not None:
         ani.save(args.output, writer='ffmpeg')
     else:
@@ -94,4 +96,5 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', required=False)
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-w', '--half-width', required=False, type=int, default=20)
+    parser.add_argument('--fps', required=False, default=24, type=int)
     main(parser.parse_args())
