@@ -58,7 +58,8 @@ def main(args):
     initial_data, initial_x_offset, initial_y_offset = get_data(files[0], ra, dec,
                                                                 half_width)
 
-    im = plt.imshow(initial_data, interpolation='None')
+    im = plt.imshow(initial_data, interpolation='None',
+            origin='lower')
     ax = plt.gca()
     circle = plt.Circle(
         (half_width, +initial_x_offset, half_width + initial_y_offset), 3,
