@@ -77,7 +77,7 @@ def main(args):
         im.set_clim(0.99 * med_vignette, 1.2 * med_vignette)
         circle.center = (half_width + offset_x, half_width + offset_y)
 
-        print('\r{}/{}'.format(i, nfiles), end='')
+        print('\r{}/{}'.format(i + 1, nfiles), end='')
         return im, circle
 
     interval = 1000. / args.fps
