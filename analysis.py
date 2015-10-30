@@ -73,7 +73,7 @@ def main(args):
         fname = files[i]
         vignette, offset_x, offset_y = get_data(fname, ra, dec, half_width)
         im.set_data(vignette)
-        med_vignette = np.median(vignette)
+        med_vignette = np.average(vignette)
         im.set_clim(0.99 * med_vignette, 1.2 * med_vignette)
         circle.center = (half_width + offset_x, half_width + offset_y)
 
